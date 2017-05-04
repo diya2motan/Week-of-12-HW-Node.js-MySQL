@@ -28,7 +28,7 @@ function displayProducts(){
 
     // table is an Array, so you can `push`, `unshift`, `splice` and friends
     for (var i = 0; i < results.length; i++) {
-
+    	// console.log(results[i].product_sales);
         productsTable.push(
             [results[i].item_id, results[i].product_name, results[i].department_name, results[i].price, results[i].stock_quantity]
         );
@@ -67,20 +67,12 @@ var customerView = function(){
  //    	choices: ['YES', 'NO']
 	}]).then(function(answers) {
 
-		// switch(answers.decision) {
-		//     case "YES":
-
-		//         //text = "Banana is good!";
-		//         break;
-		//     case "NO":
-		//         //text = "I am not a fan of orange.";
-		//         break;
-		// }
 		var id = parseInt(answers.itemID);
 		var newQuantity;
 	    connection.query('SELECT * from products where item_id = ?', [answers.itemID], function(error, results) {
 	        if (error) throw error;
 	        // console.log(results[0].stock_quantity);
+
 	        if (results[0].stock_quantity > 0 && results[0].stock_quantity > answers.itmeQuantity) {
 	            console.log("You are lucky, We have enough in store");
 
@@ -99,10 +91,12 @@ var customerView = function(){
 	            console.log("Your Total is: $", total);
 
 	            updateTable(newQuantity,id);
+	            updateSales(results[0].product_sales,id, total);
 	            connection.end();
 	   
 	        } else {
 	            console.log("Insufficient quantity!");
+	            connection.end();
 	        }
 
 	    });
@@ -120,7 +114,14 @@ function updateTable(newQuantity, id){
 				    	// console.log("hi");
 	});
 	        // connection.end();
-}
+};
+
+function updateSales(sales,id, total){
+	var updatedSales = sales + total;
+	connection.query("UPDATE products SET ? WHERE ?",[{product_sales: updatedSales},{item_id: id}], function(error,res){
+				    	// console.log("hi");
+	});
+};
 
 // connection.end();
 
